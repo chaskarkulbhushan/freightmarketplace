@@ -3,6 +3,8 @@ package com.logix.freightmarketplace.common.exception;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -42,6 +44,30 @@ class GlobalExceptionHandlerTest {
                 .andExpect(jsonPath("$.message").value("Request validation failed"))
                 .andExpect(jsonPath("$.path").value("/validation"))
                 .andExpect(jsonPath("$.timestamp").value(org.hamcrest.Matchers.endsWith("+05:30")));
+    }
+
+    @Test
+    void notBlankViolationIsHandledByGlobalExceptionHandler() throws Exception {
+        assertValidationFailure("{\"name\":\" \",\"value\":\"present\",\"code\":\"valid\"}");
+    }
+
+    @Test
+    void notNullViolationIsHandledByGlobalExceptionHandler() throws Exception {
+        assertValidationFailure("{\"name\":\"valid\",\"value\":null,\"code\":\"valid\"}");
+    }
+
+    @Test
+    void sizeViolationIsHandledByGlobalExceptionHandler() throws Exception {
+        assertValidationFailure("{\"name\":\"valid\",\"value\":\"present\",\"code\":\"x\"}");
+    }
+
+    private void assertValidationFailure(String requestBody) throws Exception {
+        mockMvc.perform(post("/validation")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.errorCode").value("VALIDATION_ERROR"));
     }
 
     @Test
@@ -93,6 +119,10 @@ class GlobalExceptionHandlerTest {
         }
     }
 
-    record TestRequest(@NotBlank String name) {
+    record TestRequest(
+            @NotBlank String name,
+            @NotNull String value,
+            @Size(min = 2, max = 5) String code
+    ) {
     }
 }
