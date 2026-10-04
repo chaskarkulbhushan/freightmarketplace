@@ -49,6 +49,7 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui.html").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/actuator/health").permitAll()
+                        .requestMatchers("/api/v1/health").permitAll()
                         .anyRequest().authenticated());
         http.sessionManagement(
                 session ->
