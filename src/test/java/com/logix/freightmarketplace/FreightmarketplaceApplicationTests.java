@@ -33,4 +33,20 @@ class FreightmarketplaceApplicationTests {
 		mockMvc.perform(get("/v3/api-docs"))
 				.andExpect(status().isOk());
 	}
+
+	@Test
+	void openApiDocumentContainsProjectMetadataWithoutSecuritySchemes() throws Exception {
+		mockMvc.perform(get("/v3/api-docs"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.info.title").value("Freight Marketplace API"))
+				.andExpect(jsonPath("$.info.description").value("REST API for the Freight Capacity Marketplace"))
+				.andExpect(jsonPath("$.info.version").value("1.0.0"))
+				.andExpect(jsonPath("$.components.securitySchemes").doesNotExist());
+	}
+
+	@Test
+	void swaggerUiIsPublic() throws Exception {
+		mockMvc.perform(get("/swagger-ui/index.html"))
+				.andExpect(status().isOk());
+	}
 }
